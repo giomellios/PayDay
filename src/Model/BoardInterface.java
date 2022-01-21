@@ -20,7 +20,7 @@ public interface BoardInterface {
 	 * 
 	 */
 	
-	public void initialize(Player p1,Player p2);//randomize
+	public void initialize(Player p1,Player p2, Card c);
 	/**
 	 * @param p1
 	 * @param p2

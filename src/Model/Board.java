@@ -10,38 +10,42 @@ public class Board implements BoardInterface {
 			"Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"
 	};
 	private Position[] pos=new Position[32];//gemizw ton pinaka sthn initialize kai analoga tou ti position einai to kathena bazw to antistoixo icon,(randomize mhn ksexasw)
+	private String[][] tempDeal,tempMail;
+	private DealCard[] dc=new DealCard[20];
+	private MailCard[] mc=new MailCard[48];
 	public int whose_turn(Player p1,Player p2) {
 		return 0;
 	}
-	//This roll dice is for moving the pawn
 	public void Roll_dice(Player p){
 		Random r=new Random();
 		
 		 this.dice=r.nextInt(7 - 1) + 1;
 		 p.setDice(dice);
-		//randomizer for dice, setDice and set_position after it
 	}
 	
 	
 	public Position[] getPosition() {
 		return this.pos;
 	}
-
-	// tha mporouse na epistrefei to array pos randomized
-	// initializing the turn
-	public void initialize(Player p1,Player p2) {
-		//tha ftiaksw 2 randomizers se 2 metablites kai while(v1!=v2) tha allazw thn timh tous
-		// to randomizer mod2+1
+	public DealCard[] getDealCards() {
+		return this.dc;
+	}
+	public MailCard[] getMailCards() {
+		return this.mc;
+	}
+	public void initialize(Player p1,Player p2,Card c) {
+		this.tempDeal=c.getDealCards();
+		this.tempMail=c.getMailCards();
 		pos[0]=new Position(0,"0","images/start.png");
 		for(int i=0;i<8;i++) {
 			if(i<4) {
-				pos[i+1]=new CardPosition(i+1,week[i%7],"images/mc1.png");
+				pos[i+1]=new MailCardPosition(i+1,week[i%7],"images/mc1.png");
 			}else {
-				pos[i+1]=new CardPosition(i+1,week[i%7],"images/mc2.png");
+				pos[i+1]=new MailCardPosition(i+1,week[i%7],"images/mc2.png");
 			}	
 		}
 		for(int i=8;i<13;i++) {
-			pos[i+1]=new CardPosition(i+1,week[i%7],"images/deal.png");
+			pos[i+1]=new DealCardPosition(i+1,week[i%7],"images/deal.png");
 		}
 		pos[14]=new Sweepstakes(14,week[13%7],"images/sweep.png");
 		pos[15]=new Sweepstakes(15,week[14%7],"images/sweep.png");
@@ -68,13 +72,73 @@ public class Board implements BoardInterface {
 			pos[i].setNum(i);
 			pos[i].setDay(week[(i-1)%7]);
 		}
+		
+		for(int i=0;i<this.tempDeal.length;i++) {
+			//System.out.println("MPIKA");
+			dc[i]=new DealCard(Integer.parseInt(this.tempDeal[i][3]),Integer.parseInt(this.tempDeal[i][4]),this.tempDeal[i][2],"images/"+this.tempDeal[i][5]);
+			//System.out.println(dc[i]);
+		}
+		for(int i=0;i<this.tempMail.length;i++) {
+			if(i<8)
+				mc[i]=new Advertisement(Integer.parseInt(this.tempMail[i][4]),"images/"+this.tempMail[i][5],this.tempMail[i][2],this.tempMail[i][3]);
+			else if(i<16)
+				mc[i]=new Bill(Integer.parseInt(this.tempMail[i][4]),"images/"+this.tempMail[i][5],this.tempMail[i][2],this.tempMail[i][3]);
+			else if(i<24)
+				mc[i]=new Charity(Integer.parseInt(this.tempMail[i][4]),"images/"+this.tempMail[i][5],this.tempMail[i][2],this.tempMail[i][3]);
+			else if(i<32)
+				mc[i]=new PayTheNeighbor(Integer.parseInt(this.tempMail[i][4]),"images/"+this.tempMail[i][5],this.tempMail[i][2],this.tempMail[i][3]);
+			else if(i<40)
+				mc[i]=new MadMoney(Integer.parseInt(this.tempMail[i][4]),"images/"+this.tempMail[i][5],this.tempMail[i][2],this.tempMail[i][3]);
+			else
+				mc[i]=new MoveTo(Integer.parseInt(this.tempMail[i][4]),"images/"+this.tempMail[i][5],this.tempMail[i][2],this.tempMail[i][3]);
+			
+		}
+		/* Shuffle */
+		for(int i=0;i<dc.length;i++) {
+			int rand=ThreadLocalRandom.current().nextInt(0,19);
+			DealCard temp= dc[rand];
+			dc[rand]=dc[i];
+			dc[i]=temp;
+		}
+		for(int i=0;i<mc.length;i++) {
+			int rand=ThreadLocalRandom.current().nextInt(0,39);
+			MailCard temp= mc[rand];
+			mc[rand]=mc[i];
+			mc[i]=temp;
+		}
+		
+		
+	}
+	public void shuffle(Card c) {
+		if(c instanceof MailCard) {
+			for(int i=0;i<mc.length;i++) {
+				int rand=ThreadLocalRandom.current().nextInt(0,39);
+				MailCard temp= mc[rand];
+				mc[rand]=mc[i];
+				mc[i]=temp;
+			}
+		}else if(c instanceof DealCard) {
+			for(int i=0;i<dc.length;i++) {
+				int rand=ThreadLocalRandom.current().nextInt(0,19);
+				DealCard temp= dc[rand];
+				dc[rand]=dc[i];
+				dc[i]=temp;
+			}
+		}
+		
 	}
 
 	public int getDice() {
 		return this.dice;
 	}
 	public void win(Player p1, Player p2) {
-		
+		if(p1.getEuros()>p2.getEuros()) {
+			p1.setWin(true);
+		}else if(p1.getEuros()<p2.getEuros()) {
+			p2.setWin(true);
+		}else {
+			
+		}
 	}
 
 	

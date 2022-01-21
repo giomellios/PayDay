@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import Model.Board;
+import Model.Card;
 import Model.Jackpot;
 import Model.Player;
 import Model.Position;
@@ -39,6 +40,7 @@ public class View{
 	JButton GetLoan1,GetLoan2;
 	JLabel jack;
 	JButton EndTurn1,EndTurn2;
+	JLabel dealCard,mailCard;
 	public JPanel Player1(Player p1,int xcord,int ycord,Color c) {
 		
 		JPanel p=new JPanel();
@@ -49,6 +51,7 @@ public class View{
 		this.myDealCards1=new JButton("My Deal Cards");
 		this.GetLoan1=new JButton("Get Loan");
 		this.EndTurn1=new JButton("End Turn");
+		this.bills1=new JLabel("Bills: "+p1.getBills()+" Euros");
 		//600,50 gia to p1
 		p.setBounds(xcord,ycord,250,250);
 		p.setLayout(null);
@@ -56,12 +59,11 @@ public class View{
 		name.setBounds(10,0,100,50);
 		this.euros1.setBounds(10, 30,150, 90);
 		this.loan1.setBounds(10,60,150,90);
-		//this.bills.setBounds(0,ycord-70,150,100);
+		this.bills1.setBounds(10,90,150,90);
 		this.rolldice1.setBounds(10,170,120,20);
 		this.myDealCards1.setBounds(10,195,120,20);
 		this.GetLoan1.setBounds(10,220, 115, 20);
 		this.EndTurn1.setBounds(130,220,115,20);
-		
 		
 		
 		p.add(name);
@@ -71,9 +73,7 @@ public class View{
 		p.add(myDealCards1);
 		p.add(GetLoan1);
 		p.add(EndTurn1);
-	
-		
-		
+		p.add(bills1);
 		
 		return p;
 	}
@@ -97,27 +97,23 @@ public class View{
 		this.myDealCards2 = new JButton("My Deal Cards");
 		this.GetLoan2 = new JButton("Get Loan");
 		this.EndTurn2 = new JButton("End Turn");
-		// 600,50 gia to p1
+		this.bills2=new JLabel("Bills: "+p1.getBills()+" Euros");
 		p.setBounds(xcord, ycord, 250, 250);
 		p.setLayout(null);
 		p.setBorder(BorderFactory.createLineBorder(c));
 		name.setBounds(10, 0, 100, 50);
 		this.euros2.setBounds(10, 30, 150, 90);
 		this.loan2.setBounds(10, 60, 150, 90);
-		// this.bills.setBounds(0,ycord-70,150,100);
+		this.bills2.setBounds(10,90,150,90);
 		this.rolldice2.setBounds(10, 170, 120, 20);
 		this.myDealCards2.setBounds(10, 195, 120, 20);
 		this.GetLoan2.setBounds(10, 220, 115, 20);
 		this.EndTurn2.setBounds(130, 220, 115, 20);
 
-
-		/*i=new ImageIcon("C:\\Users\\giost\\Desktop\\PhaseA_4416\\src\\Tests\\images\\dice-1.jpg");
-		i=this.getScaledImage(i.getDescription(),80, 50);
-		dice2=new JLabel(i);
-		dice2.setBounds(150, 170,80,50);*/
 		p.add(name);
 		p.add(euros2);
 		//p.add(dice2);
+		p.add(bills2);
 		p.add(loan2);
 		p.add(rolldice2);
 		p.add(myDealCards2);
@@ -136,7 +132,6 @@ public class View{
 		
 		for(int i=0;i<p.length;i++) {
 			icons[i]=p[i].getIcon();
-			System.out.println(p[i].getIcon());
 		}
 		panel.setLayout(new GridLayout(5,7));
 		panel.setBounds(0,150,560,560);
@@ -165,15 +160,20 @@ public class View{
 		icon=getScaledImage(icon.getDescription(),50, 50);
 		pawn1=new JLabel(icon);
 		this.setPawn1(0, 150);
-		//pawn1.setBounds(0,150,50,50);
 		return pawn1;
+	}
+	public void setBills(Player p,int who) {
+		if(who==1) 
+			this.bills1.setText("Bills: "+p.getBills()+" Euros");
+		else
+			this.bills2.setText("Bills: "+p.getBills()+" Euros");
+			
 	}
 	
 	public JLabel Pawn2(ImageIcon icon) {
 		icon=getScaledImage(icon.getDescription(),50, 50);
 		pawn2=new JLabel(icon);
 		this.setPawn2(0, 200);
-		//pawn1.setBounds(0,150,50,50);
 		return pawn2;
 	}
 	
@@ -260,7 +260,7 @@ public class View{
 	public void setJack(int eur) {
 		this.jack.setText("Jackpot: "+Integer.toString(eur)+" Euros");
 	}
-	public View(Player p1,Player p2,Board b) {
+	public View(Player p1,Player p2,Board b,Card c) {
 		JLabel backg;
 		JLabel logo;
 		Jackpot j=new Jackpot();
@@ -270,6 +270,7 @@ public class View{
 		JPanel player2=new JPanel();
 		JPanel info=new JPanel();
 		info=this.text(p1);
+		
 		
 		/* Pawns */
 		ImageIcon icon=new ImageIcon("images/pawn_blue.png");
@@ -302,18 +303,30 @@ public class View{
 		jack.setForeground(Color.blue);
 		jack.setBounds(350, 610, 200, 100);
 		
+		/* DealCard label*/
+		icon=new ImageIcon("images/dealCard.png");
+		icon=this.getScaledImage(icon.getDescription(), 100, 50);
+		dealCard=new JLabel(icon);
+		dealCard.setBounds(600, 425, 100, 50);
+		
+		icon=new ImageIcon("images/mailCard.png");
+		icon=this.getScaledImage(icon.getDescription(), 100, 50);
+		mailCard=new JLabel(icon);
+		mailCard.setBounds(720, 425, 100, 50);
+		
 		/* Players and Board initialization*/
 		player1=this.Player1(p1, 600, 50,Color.RED);
 		player2=this.Player2(p2,600 ,500,Color.YELLOW);
-		b.initialize(p1, p2);
+		b.initialize(p1, p2,c);
 		p=this.Positions(b);
 		frame.setSize(900,800);
-		//gia ta pionia, shmasia exei h seira pou tha kanw add outws wste na "panwgrafoun"
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.add(logo);
 		frame.add(dice1);
-		frame.add(info);
+		//frame.add(info);
 		frame.add(dice2);
+		frame.add(dealCard);
+		frame.add(mailCard);
 		frame.add(pawn1);
 		frame.add(pawn2);
 		frame.add(jack);
@@ -327,10 +340,10 @@ public class View{
 	}
 
 	public ImageIcon getScaledImage(String img, int w, int h){
-		ImageIcon imageIcon = new ImageIcon(img); // load the image to a imageIcon
-		Image image = imageIcon.getImage(); // transform it 
-		Image newimg = image.getScaledInstance(w, h,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way  
-		imageIcon = new ImageIcon(newimg);  // transform it back
+		ImageIcon imageIcon = new ImageIcon(img);
+		Image image = imageIcon.getImage();
+		Image newimg = image.getScaledInstance(w, h,  java.awt.Image.SCALE_SMOOTH);
+		imageIcon = new ImageIcon(newimg);
 		return imageIcon;
 	}
 	

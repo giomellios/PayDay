@@ -27,16 +27,16 @@ public class Position {
 	public void setNum(int pos) {
 		this.num=pos;
 	}
-	public void SundayFootballDay() {
-		
-	}
-	public void Crypto() {
-		
-	}
 	public void performAction(Player p,int diceNumber) {
-		System.out.println("Mpike edw");
+	
 	}
 	public void performAction(Player p1,Player p2,int diceNumber) {
+		
+	}
+	public void performAction(Player p,DealCard dc) {
+		
+	}
+	public void performAction(Player p1,Player p2,MailCard mc,int who,Jackpot j) {
 		
 	}
 	

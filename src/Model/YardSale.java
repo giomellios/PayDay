@@ -8,4 +8,10 @@ public class YardSale extends DicePosition{
 	public String getIcon() {
 		return this.icon;
 	}
+	public void performAction(Player p,int diceNumber) {
+		p.setEuros(p.getEuros()-100*diceNumber);
+	}
+	public void performAction(Player p,DealCard dc) {
+		
+	}
 }

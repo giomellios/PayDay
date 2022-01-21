@@ -10,6 +10,8 @@ public class CardPosition extends Position{
 		return null;
 	}
 	public Card kind_of_card() {
+		if(this.icon.equals("images/deal.png")) {
+		}
 		return null;
 	}
 	public String getIcon() {

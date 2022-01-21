@@ -1,15 +1,33 @@
 package Model;
 
-public class MailCard extends Card implements CardInterface {
+public class MailCard extends Card {
 
-	
-	public void action() {
+
+	private int money;
+	private String icon,message,choice;
+	public MailCard(int money,String icon,String message,String choice) {
+		this.money=money;
+		this.icon=icon;
+		this.message=message;
+		this.choice=choice;
+	}
+	public int getMoney() {
+		return this.money;
+	}
+	public String getIcon() {
+		return this.icon;
+	}
+	public String getMessage() {
+		return this.message;
+	}
+	public String getChoice(){
+		return this.choice;
+	}
+	public void action(Player p1,Player p2,MailCard mc,int who) {
 		
 	}
-
-	public int money_of_the_card() {
-		return 0;
+	public void action(Player p,MailCard mc,Jackpot j) {
+		
 	}
-
 	
 }

@@ -16,53 +16,48 @@ public class Controller implements ActionListener {
 	 * work(also, here I will make the main method of the program).
 	 */
 	Board b = new Board();
+	Card c = new Card();
 	Jackpot j = new Jackpot();
-	Player p1 = new Player(3500, "Player1");
-	Player p2 = new Player(3500, "Player2");
-	View v = new View(p1, p2, b);
+	Player p1 = new Player(3500, "Eisai te");
+	Player p2 = new Player(3500, "Leiws hlithia");
+	View v = new View(p1, p2, b, c);
 	Position[] pos = new Position[32];
-	boolean move = true;
+	DealCard[] dc = new DealCard[20];
+	public int dcCount = 0, mcCount = 0;
+	MailCard[] mc = new MailCard[48];
+	String month;
 
 	public Controller() {
 		pos = b.getPosition();
+		dc = b.getDealCards();
+		mc = b.getMailCards();
+		System.out.println(mc[0].getIcon());
+		// System.out.println(this.dc[2].getCost());
 		Random random = new Random();
 		int t = random.nextInt(3 - 1) + 1;
 		if (t == 1) {
 			p1.setTurn(1);
 			p2.setTurn(0);
 			v.getRollDice(2).setEnabled(false);
+			v.getEndTurn(2).setEnabled(false);
 		} else {
 			p1.setTurn(0);
 			p2.setTurn(1);
 			v.getRollDice(1).setEnabled(false);
+			v.getEndTurn(1).setEnabled(false);
 		}
-		String m;
 		do {
-			m=JOptionPane.showInputDialog("How many months do you want the game to last? Enter a number 1-3");
-		}while(Integer.parseInt(m)<1 || Integer.parseInt(m)>3);
+			month = JOptionPane.showInputDialog("How many months do you want the game to last? Enter a number 1-3");
+		} while (Integer.parseInt(month) < 1 || Integer.parseInt(month) > 3);
+		System.out.println(Integer.parseInt(month));
 		v.getRollDice(1).addActionListener(this);
 		v.getRollDice(2).addActionListener(this);
 		v.getEndTurn(1).addActionListener(this);
 		v.getEndTurn(2).addActionListener(this);
-		/// edw tha bazw ston xrhsth na dialeksei tous mhnes
-		while (p1.getWin() != true && p2.getWin() != true) {
-			// se auto to loop mporw na balw oti thelw na ekteleitai kata th diarkeia tou
-			// game
-			// System.out.println(p1.getTurn()+" "+p2.getTurn());
-			
-			if (p1.getMonth() == 3 /*&&p1.getPawnPos() == 31*/) {
-				System.out.println("AINTES AMAN");
-			}
-/*			if (p2.getTurn() == 1) {
-				if (b.getDice() == 6) {
-					p2.setEuros(p2.getEuros() + j.getAvailableEuro());
-					v.setEuros(p2,2);
-					j.setAvailableEuro(0);
-				}
-			}*/
-
-		}
-
+		v.getDealCards(1).addActionListener(this);
+		v.getDealCards(2).addActionListener(this);
+		v.getLoan(1).addActionListener(this);
+		v.getLoan(2).addActionListener(this);
 	}
 
 	public static void main(String[] args) {
@@ -70,121 +65,351 @@ public class Controller implements ActionListener {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		String n1,n2;
+		String n1, n2;
+		if((p2.getMonth()>Integer.parseInt(month) && p2.getPawnPos()==0) && (p1.getMonth()>Integer.parseInt(month) && p1.getPawnPos()==0)) {
+			b.win(p1, p2);
+			if(p1.getWin())
+				JOptionPane.showMessageDialog(null, "Player "+p1.getName()+" Won!");
+			else if(p2.getWin())
+				JOptionPane.showMessageDialog(null, "Player "+p2.getName()+" Won!");
+			//else
+				//JOptionPane.showMessageDialog(null, "Tie");
+		}
 		if (e.getSource() == v.getRollDice(1)) {
-			b.Roll_dice(p1);
-			v.dice(b.getDice(), 1); // visual apeikonisi
-			// actions ...
-			if (b.getDice() == 6 && j.getAvailableEuro()!=0) {
-				JOptionPane.showMessageDialog(null, "Congratulations! You got the Jackpot: "+j.getAvailableEuro()+" Euros added.");
-				p1.setEuros(p1.getEuros() + j.getAvailableEuro());
-				v.setEuros(p1,1);
-				System.out.println(p1.getEuros());
+			if (p1.getMonth() <= Integer.parseInt(month)) {
+				b.Roll_dice(p1);
+				v.dice(b.getDice(), 1);
+				if (b.getDice() == 6 && j.getAvailableEuro() != 0) {
+					JOptionPane.showMessageDialog(null,
+							"Congratulations! You got the Jackpot: " + j.getAvailableEuro() + " Euros added.");
+					p1.setEuros(p1.getEuros() + j.getAvailableEuro());
+					v.setEuros(p1, 1);
+					System.out.println(p1.getEuros());
+					j.setAvailableEuro(0);
+					v.setJack(0);
+				}
+				p1.setPawnPos(p1.getPawnPos() + p1.getDice());
+				if (p1.getPawnPos() <= 6) {
+					v.setPawn1((p1.getPawnPos() % 7) * 85, 150);
+				} else if (p1.getPawnPos() <= 13) {
+					v.setPawn1((p1.getPawnPos() % 7) * 85, 265);
+				} else if (p1.getPawnPos() <= 20) {
+					v.setPawn1((p1.getPawnPos() % 7) * 85, 375);
+				} else if (p1.getPawnPos() <= 27) {
+					v.setPawn1((p1.getPawnPos() % 7) * 85, 485);
+				} else if (p1.getPawnPos() < 31) {
+					v.setPawn1((p1.getPawnPos() % 7) * 85, 595);
+				} else if (p1.getPawnPos() <= 40) {
+					v.setPawn1(3 * 85, 595);
+					p1.setPawnPos(32);
+				}
+			//	System.out.println(
+				//		"PAIKTHS 1 THESI: " + p1.getPawnPos() + " ZARIA: " + b.getDice() + " MHNAS: " + p1.getMonth());
+				if (p1.getPawnPos() >=31) {
+					p1.setEuros(p1.getEuros() + 3500);
+					if(p1.getBills()>0) {
+						JOptionPane.showMessageDialog(null, "You have to pay your bills. Money will automatically be taken by eforia");
+						p1.setEuros(p1.getEuros()-p1.getBills());
+					}
+					p1.setPawnPos(0);
+					p1.setMonth(p1.getMonth() + 1);
+					v.setEuros(p1, 1);
+					// v.setPawn1(x, y);
+				}
+				if (pos[p1.getPawnPos()] instanceof Sweepstakes) {
+					b.Roll_dice(p1);
+					v.dice(b.getDice(), 1);
+					JOptionPane.showMessageDialog(null,
+							"Sweepstakes Position: The dice rolled automatically and got a " + b.getDice());
+					pos[p1.getPawnPos()].performAction(p1, b.getDice());
+					v.setEuros(p1, 1);
+				} else if (pos[p1.getPawnPos()] instanceof Lottery) {
+					do {
+						n1 = JOptionPane.showInputDialog("PLAYER: " + p1.getName() + " Enter a number 1-6 ");
+						n2 = JOptionPane.showInputDialog("PLAYER: " + p2.getName() + " Enter a number 1-6 ");
+
+					} while ((Integer.parseInt(n1) < 1 || Integer.parseInt(n1) > 6)
+							|| (Integer.parseInt(n2) < 1 || Integer.parseInt(n2) > 6)
+							|| (Integer.parseInt(n1) == Integer.parseInt(n2)));
+					do {
+						System.out.println(Integer.parseInt(n1) + " " + Integer.parseInt(n2) + " " + b.getDice());
+						b.Roll_dice(p1);
+						v.dice(b.getDice(), 1);
+						JOptionPane.showMessageDialog(null,
+								"Lottery Position: The dice rolled automatically and got a " + b.getDice());
+					} while (b.getDice() != Integer.valueOf(n1) && b.getDice() != Integer.valueOf(n2));
+					if (b.getDice() == Integer.parseInt(n1)) {
+						pos[p1.getPawnPos()].performAction(p1, b.getDice());
+						v.setEuros(p1, 1);
+					} else {
+						pos[p1.getPawnPos()].performAction(p2, b.getDice());
+						v.setEuros(p2, 2);
+					}
+				} else if (pos[p1.getPawnPos()] instanceof Radio) {
+					b.Roll_dice(p1);
+					b.Roll_dice(p2);
+					do {
+						JOptionPane.showMessageDialog(null,
+								"Radio Position: The dice will roll automatically for each Player and the biggest roll wins the money!");
+						b.Roll_dice(p1);
+						JOptionPane.showMessageDialog(null, "The dice rolled automatically for Player " + p1.getName()
+								+ " and got a " + p1.getDice());
+						v.dice(p1.getDice(), 1);
+						b.Roll_dice(p2);
+						JOptionPane.showMessageDialog(null, "The dice rolled automatically for Player " + p2.getName()
+								+ "and got a " + p2.getDice());
+						v.dice(p2.getDice(), 2);
+						pos[p1.getPawnPos()].performAction(p1, p2, b.getDice());
+					} while (p1.getDice() == p2.getDice());
+					v.setEuros(p1, 1);
+					v.setEuros(p2, 2);
+				} else if (pos[p1.getPawnPos()] instanceof FamilyCasinoNight) {
+					if (b.getDice() % 2 == 1) {
+						j.setAvailableEuro(j.getAvailableEuro() + 500);
+						v.setJack(j.getAvailableEuro());
+					}
+					pos[p1.getPawnPos()].performAction(p1, b.getDice());
+					JOptionPane.showMessageDialog(null,
+							"Family Casino Night Position: If the dice you rolled to get in this position was odd you pay 500 euro to the jackpot, otherwise, you get paid 500 euros.");
+					v.setEuros(p1, 1);
+				} else if (pos[p1.getPawnPos()] instanceof DealCardPosition) {
+					int a = p1.getDealCards();
+					if(dcCount>b.getDealCards().length) {
+						//reshuffle and dcCount=0;
+					}
+					pos[p1.getPawnPos()].performAction(p1, dc[dcCount]);
+					v.setEuros(p1, 1);
+					dcCount++;
+				} else if (pos[p1.getPawnPos()] instanceof Buyer) {
+					String s;
+					int tries = 0;
+					if (p1.getDeal().size() > 0) {
+						// JOptionPane.showMessageDialog(null,
+						// "Press the My Deal Cards Button in order to see your cards, otherwise you
+						// won't be able to select one.");
+						p1.showDealCards();
+						do {
+							s = JOptionPane.showInputDialog("Which Deal Card do you want to sell? (Enter the number)");
+							if (tries > 0) {
+								JOptionPane.showMessageDialog(null, "Wrong number! " + p1.getDeal().size());
+							}
+							tries++;
+						} while (Integer.parseInt(s) > p1.getDeal().size());
+						pos[p1.getPawnPos()].performAction(p1, Integer.parseInt(s));
+						v.setEuros(p1, 1);
+					} else {
+						JOptionPane.showMessageDialog(null, "Den exeis kartes symfwnias gia na poulhseis :(.");
+					}
+				}else if(pos[p1.getPawnPos()] instanceof MailCardPosition) {
+					if(pos[p1.getPawnPos()].getIcon().equals("images/mc1.png")) {
+						pos[p1.getPawnPos()].performAction(p1,p2, mc[mcCount], 1,j);
+						mcCount++;
+					}else if(pos[p1.getPawnPos()].getIcon().equals("images/mc2.png")) {
+						for(int i=0;i<2;i++) {
+							pos[p1.getPawnPos()].performAction(p1, p2, mc[mcCount], 1, j);
+							mcCount++;
+						}
+					}
+					v.setEuros(p1, 1);
+					v.setEuros(p2, 2);
+					v.setJack(j.getAvailableEuro());
+					v.setBills(p1, 1);
+				}else if(pos[p1.getPawnPos()] instanceof YardSale) {
+					b.Roll_dice(p1);
+					/*  ELEGXOS GIA TO AN H STOIBA TWN KARTWN EXEI TELEIWSEI */
+					JOptionPane.showMessageDialog(null, "YardSale Position: You pay 100* the dice that will roll automatically and pull the first card from the Deal Card stack");
+					JOptionPane.showMessageDialog(null, "The dice rolled automatically and got a "+b.getDice());
+					v.dice(b.getDice(), 1);
+					pos[p1.getPawnPos()].performAction(p1, p1.getDice());
+					pos[p1.getPawnPos()].performAction(p1, dc[dcCount]);
+					dcCount++;
+				}
+				if (pos[p1.getPawnPos()].getDay().equals("Sunday")) {
+					b.Roll_dice(p1);
+					p1.SundayFootballDay(b.getDice(), p1, v, 1);
+					v.dice(p1.getDice(), 1);
+				}
+				if (pos[p1.getPawnPos()].getDay().equals("Thursday")) {
+					b.Roll_dice(p1);
+					p1.Crypto(b.getDice(), p1, v, 1);
+					v.dice(p1.getDice(), 1);
+				}
+				if(p2.getMonth()<=Integer.parseInt(month))
+					v.getRollDice(1).setEnabled(false);
+			}else {
+				JOptionPane.showMessageDialog(null, "You finished!");
+				v.getRollDice(1).setEnabled(false);
+			}
+		} else if (e.getSource() == v.getRollDice(2)) {
+			if(p2.getMonth()<=Integer.parseInt(month)) {
+			b.Roll_dice(p2);
+			v.dice(b.getDice(), 2); // visual apeikonisi
+			if (b.getDice() == 6 && j.getAvailableEuro() != 0) {
+				JOptionPane.showMessageDialog(null,
+						"Congratulations! You got the Jackpot: " + j.getAvailableEuro() + " Euros added.");
+				p2.setEuros(p2.getEuros() + j.getAvailableEuro());
+				v.setEuros(p2, 2);
+				System.out.println(p2.getEuros());
 				j.setAvailableEuro(0);
 				v.setJack(0);
 			}
-			p1.setPawnPos(p1.getPawnPos() + p1.getDice());
-			if(p1.getPawnPos()<=6) {
-				v.setPawn1((p1.getPawnPos()%7)*85, 150);
-				System.out.println("EPIPEDO 1");
-			}else if(p1.getPawnPos()<=13) {
-				v.setPawn1((p1.getPawnPos()%7)*85, 265);
-				System.out.println("EPIPEDO 2");
-			}else if(p1.getPawnPos()<=20) {
-				v.setPawn1((p1.getPawnPos()%7)*85, 375);
-				System.out.println("EPIPEDO 3");
-			}else if(p1.getPawnPos()<=27) {
-				v.setPawn1((p1.getPawnPos()%7)*85, 485);
-				System.out.println("EPIPEDO 4");
-			}else if(p1.getPawnPos()<31) {
-				v.setPawn1((p1.getPawnPos()%7)*85, 595);
-				System.out.println("EPIPEDO 5");
-			}else if(p1.getPawnPos()<=37){
-				v.setPawn1(3*85, 595);
-				p1.setPawnPos(0);
+			p2.setPawnPos(p2.getPawnPos() + p2.getDice());
+			if (p2.getPawnPos() <= 6) {
+				v.setPawn2((p2.getPawnPos() % 7) * 85, 200);
+			} else if (p2.getPawnPos() <= 13) {
+				v.setPawn2((p2.getPawnPos() % 7) * 85, 315);
+			} else if (p2.getPawnPos() <= 20) {
+				v.setPawn2((p2.getPawnPos() % 7) * 85, 430);
+			} else if (p2.getPawnPos() <= 27) {
+				v.setPawn2((p2.getPawnPos() % 7) * 85, 545);
+			} else if (p2.getPawnPos() < 31) {
+				v.setPawn2((p2.getPawnPos() % 7) * 85, 660);
+			} else if (p2.getPawnPos() <= 37) {
+				v.setPawn2(3 * 85, 660);
+				p2.setPawnPos(32);
 			}
-			System.out.println("THESI: "+p1.getPawnPos()+" ZARIA: "+b.getDice()+" MHNAS: "+p1.getMonth());
-			if (p1.getPawnPos() > 31) {
-				p1.setEuros(p1.getEuros() + 3500);
-				p1.setPawnPos(0);
-				p1.setMonth(p1.getMonth()+1);
-				v.setEuros(p1,1);
-				//v.setPawn1(x, y);
+			//System.out.println(
+				//	"PAIKTHS 2 THESI: " + p2.getPawnPos() + " ZARIA: " + b.getDice() + " MHNAS: " + p2.getMonth());
+			if (p2.getPawnPos() > 31) {
+				p2.setEuros(p2.getEuros() + 3500);
+				p2.setPawnPos(0);
+				p2.setMonth(p2.getMonth() + 1);
+				v.setEuros(p2, 2);
 			}
-			if (pos[p1.getPawnPos()] instanceof Sweepstakes) {
-				b.Roll_dice(p1);
-				v.dice(b.getDice(), 1);
+			if (pos[p2.getPawnPos()] instanceof Sweepstakes) {
+				b.Roll_dice(p2);
+				v.dice(b.getDice(), 2);
 				JOptionPane.showMessageDialog(null,
-						"Sweepstakes Position: The dice rolled automatically and got a "+b.getDice());
-				pos[p1.getPawnPos()].performAction(p1, b.getDice());
-				v.setEuros(p1,1);
-			} else if (pos[p1.getPawnPos()] instanceof Lottery) {
+						"Sweepstakes Position: The dice rolled automatically and got a " + b.getDice());
+				pos[p2.getPawnPos()].performAction(p2, b.getDice());
+				v.setEuros(p2, 2);
+			} else if (pos[p2.getPawnPos()] instanceof Lottery) {
 				do {
-					n1=JOptionPane.showInputDialog("PLAYER: "+p1.getName()+" Enter a number 1-6 ");
-					n2=JOptionPane.showInputDialog("PLAYER: "+p2.getName()+" Enter a number 1-6 ");
-					
-				}while((Integer.parseInt(n1)<1 || Integer.parseInt(n1)>6) || (Integer.parseInt(n2)<1 || Integer.parseInt(n2)>6) || (Integer.parseInt(n1)==Integer.parseInt(n2)));
+					n2 = JOptionPane.showInputDialog("PLAYER: " + p2.getName() + " Enter a number 1-6 ");
+					n1 = JOptionPane.showInputDialog("PLAYER: " + p1.getName() + " Enter a number 1-6 ");
+
+				} while ((Integer.parseInt(n1) < 1 || Integer.parseInt(n1) > 6)
+						|| (Integer.parseInt(n2) < 1 || Integer.parseInt(n2) > 6)
+						|| (Integer.parseInt(n1) == Integer.parseInt(n2)));
 				do {
-					System.out.println(Integer.parseInt(n1)+" "+Integer.parseInt(n2)+" "+b.getDice());
-					b.Roll_dice(p1);
-					v.dice(b.getDice(), 1);
-					JOptionPane.showMessageDialog(null, "Lottery Position: The dice rolled automatically and got a "+b.getDice());	
-				}while(b.getDice()!=Integer.valueOf(n1) && b.getDice()!=Integer.valueOf(n2));
-				if(b.getDice()==Integer.parseInt(n1)) {
-					pos[p1.getPawnPos()].performAction(p1, b.getDice());
-					v.setEuros(p1,1);
-				}else {
-					pos[p1.getPawnPos()].performAction(p2, b.getDice());
-					v.setEuros(p2,2);
+					System.out.println(Integer.parseInt(n1) + " " + Integer.parseInt(n2) + " " + b.getDice());
+					b.Roll_dice(p2);
+					v.dice(b.getDice(), 2);
+					JOptionPane.showMessageDialog(null,
+							"Lottery Position: The dice rolled automatically and got a " + b.getDice());
+				} while (b.getDice() != Integer.valueOf(n1) && b.getDice() != Integer.valueOf(n2));
+				if (b.getDice() == Integer.parseInt(n1)) {
+					pos[p2.getPawnPos()].performAction(p1, b.getDice());
+					v.setEuros(p1, 1);
+				} else {
+					pos[p2.getPawnPos()].performAction(p2, b.getDice());
+					v.setEuros(p2, 2);
 				}
-			}else if(pos[p1.getPawnPos()] instanceof Radio) {
+			} else if (pos[p2.getPawnPos()] instanceof Radio) {
 				b.Roll_dice(p1);
 				b.Roll_dice(p2);
 				do {
-					JOptionPane.showMessageDialog(null,"Radio Position: The dice will roll automatically for each Player and the biggest roll wins the money!");
-					b.Roll_dice(p1);
 					JOptionPane.showMessageDialog(null,
-							"The dice rolled automatically for Player " + p1.getName() + " and got a " + p1.getDice());
-					v.dice(p1.getDice(), 1);
+							"Radio Position: The dice will roll automatically for each Player and the biggest roll wins the money!");
 					b.Roll_dice(p2);
 					JOptionPane.showMessageDialog(null,
-							"The dice rolled automatically for Player " + p2.getName() + "and got a " + p2.getDice());
+							"The dice rolled automatically for Player " + p2.getName() + " and got a " + p2.getDice());
 					v.dice(p2.getDice(), 2);
-					pos[p1.getPawnPos()].performAction(p1, p2, b.getDice());
+					b.Roll_dice(p1);
+					JOptionPane.showMessageDialog(null,
+							"The dice rolled automatically for Player " + p1.getName() + "and got a " + p1.getDice());
+					v.dice(p1.getDice(), 1);
+					pos[p2.getPawnPos()].performAction(p1, p2, b.getDice());
 				} while (p1.getDice() == p2.getDice());
 				v.setEuros(p1, 1);
 				v.setEuros(p2, 2);
-			}else if (pos[p1.getPawnPos()] instanceof FamilyCasinoNight) {
-				if(b.getDice()%2==1) {
-					j.setAvailableEuro(j.getAvailableEuro()+500);
+			} else if (pos[p2.getPawnPos()] instanceof FamilyCasinoNight) {
+				if (b.getDice() % 2 == 1) {
+					j.setAvailableEuro(j.getAvailableEuro() + 500);
 					v.setJack(j.getAvailableEuro());
 				}
-				pos[p1.getPawnPos()].performAction(p1, b.getDice());
-				JOptionPane.showMessageDialog(null, "FAMILYCASINONIGHT");
+				pos[p2.getPawnPos()].performAction(p2, b.getDice());
+				JOptionPane.showMessageDialog(null,
+						"Family Casino Night Position: If the dice you rolled to get in this position was odd you pay 500 euro to the jackpot, otherwise, you get paid 500 euros.");
+				v.setEuros(p2, 2);
+			} else if (pos[p2.getPawnPos()] instanceof DealCardPosition) {
+				int a = p2.getDealCards();
+				if(dcCount>b.getDealCards().length) {
+					//reshuffle and dcCount=0;
+				}
+				pos[p2.getPawnPos()].performAction(p2, dc[dcCount]);
+				dcCount++;
+				v.setEuros(p2, 2);
+			} else if (pos[p2.getPawnPos()] instanceof Buyer) {
+				String s;
+				int tries = 0;
+				if (p2.getDeal().size() > 0) {
+					// JOptionPane.showMessageDialog(null,
+					// "Press the My Deal Cards Button in order to see your cards, otherwise you
+					// won't be able to select one.");
+					p2.showDealCards();
+					do {
+						s = JOptionPane.showInputDialog("Which Deal Card do you want to sell? (Enter the number)");
+						if (tries > 0) {
+							JOptionPane.showMessageDialog(null, "Wrong number! " + p2.getDeal().size());
+						}
+						tries++;
+					} while (Integer.parseInt(s) > p2.getDeal().size());
+					pos[p2.getPawnPos()].performAction(p2, Integer.parseInt(s));
+					v.setEuros(p2, 2);
+				} else {
+					JOptionPane.showMessageDialog(null, "Den exeis kartes symfwnias gia na poulhseis :(.");
+				}
+			}else if(pos[p2.getPawnPos()] instanceof MailCardPosition) {
+				if (pos[p2.getPawnPos()].getIcon().equals("images/mc1.png")) {
+					pos[p2.getPawnPos()].performAction(p1, p2, mc[mcCount], 2, j);
+					mcCount++;
+				}else if(pos[p2.getPawnPos()].getIcon().equals("images/mc2.png")) {
+					for(int i=0;i<2;i++) {
+						System.out.println("MPIKA "+i);
+						pos[p2.getPawnPos()].performAction(p1, p2, mc[mcCount], 2, j);
+						mcCount++;
+					}
+				}
 				v.setEuros(p1, 1);
+				v.setEuros(p2, 2);
+				v.setJack(j.getAvailableEuro());
+				v.setBills(p2, 2);
 			}
-		} else if (e.getSource() == v.getRollDice(2)) {
-			b.Roll_dice(p2);
-			v.dice(b.getDice(), 2); // visual apeikonisi
-			// actions ...
-			if (p2.getPawnPos() > 31) {
-				p2.setPawnPos(31);
-				p2.setEuros(p2.getEuros() + 3500);
-				p2.setPawnPos(0);
-				v.setEuros(p2,2);
+			if (pos[p2.getPawnPos()].getDay().equals("Sunday")) {
+				b.Roll_dice(p2);
+				p2.SundayFootballDay(b.getDice(), p2, v, 2);
+				v.dice(p2.getDice(), 2);
 			}
-			// v.getRollDice(1).setEnabled(false);
-			System.out.println(p2.getPawnPos());
+			if (pos[p2.getPawnPos()].getDay().equals("Thursday")) {
+				b.Roll_dice(p2);
+				p2.Crypto(b.getDice(), p2, v, 2);
+				v.dice(p2.getDice(), 2);
+			}
+			if(p1.getMonth()<=Integer.parseInt(month))
+				v.getRollDice(2).setEnabled(false);
+			}else {
+				JOptionPane.showMessageDialog(null, "You finished");
+			}
 		} else if (e.getSource() == v.getEndTurn(1)) {
 			p1.setTurn(0);
 			p2.setTurn(1);
 			v.getRollDice(2).setEnabled(true);
 			v.getRollDice(1).setEnabled(false);
+			v.getEndTurn(1).setEnabled(false);
+			v.getEndTurn(2).setEnabled(true);
 		} else if (e.getSource() == v.getEndTurn(2)) {
 			p1.setTurn(1);
 			p2.setTurn(0);
+			v.getEndTurn(2).setEnabled(false);
 			v.getRollDice(1).setEnabled(true);
 			v.getRollDice(2).setEnabled(false);
+			v.getEndTurn(1).setEnabled(true);
+		}else if(e.getSource() == v.getDealCards(1)) {
+			p1.showDealCards();
+		}else if(e.getSource()==v.getDealCards(2)) {
+			p2.showDealCards();
+		}else if(e.getSource()==v.getLoan(1)) {
 		}
 
 	}
